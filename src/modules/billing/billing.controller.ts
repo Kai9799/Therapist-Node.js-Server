@@ -1,14 +1,16 @@
-import { Controller, Post, Body, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
 import { BillingService } from './billing.service';
 import { Response } from 'express';
 import { RawBodyRequest } from '../../types/express';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('billing')
 export class BillingController {
     constructor(private readonly billingService: BillingService) { }
 
     @Post('create-checkout-session')
+    @UseGuards(AuthGuard)
     async createCheckoutSession(@Body() dto: CreateCheckoutSessionDto) {
         return this.billingService.createCheckoutSession(dto.priceId);
     }
