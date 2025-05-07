@@ -1,15 +1,16 @@
 import { Controller, Post, Body, Req, Res } from '@nestjs/common';
 import { BillingService } from './billing.service';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { RawBodyRequest } from '../../types/express';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 
 @Controller('billing')
 export class BillingController {
     constructor(private readonly billingService: BillingService) { }
 
     @Post('create-checkout-session')
-    async createCheckoutSession(@Body('priceId') priceId: string) {
-        return this.billingService.createCheckoutSession(priceId);
+    async createCheckoutSession(@Body() dto: CreateCheckoutSessionDto) {
+        return this.billingService.createCheckoutSession(dto.priceId);
     }
 
     @Post('webhook')
