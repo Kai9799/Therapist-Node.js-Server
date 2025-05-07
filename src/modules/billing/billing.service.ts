@@ -13,12 +13,12 @@ export class BillingService {
         this.appUrl = process.env.APP_URL!;
     }
 
-    async createCheckoutSession(priceId: string): Promise<CustomJsonResponse> {
+    async createCheckoutSession(priceId: string, quantity: number): Promise<CustomJsonResponse> {
         try {
             const session = await stripeInstance.checkout.sessions.create({
                 mode: 'subscription',
                 payment_method_types: ['card'],
-                line_items: [{ price: priceId, quantity: 1 }],
+                line_items: [{ price: priceId, quantity }],
                 subscription_data: {
                     trial_period_days: 14,
                 },

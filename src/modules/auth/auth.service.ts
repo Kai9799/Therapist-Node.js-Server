@@ -1,9 +1,10 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { SupabaseService } from "src/config/supabase";
 
 @Injectable()
 export class AuthService {
-    private supabase;
+    private supabase: SupabaseClient;
 
     constructor(private readonly supabaseService: SupabaseService) {
         this.supabase = this.supabaseService.getClient();

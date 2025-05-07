@@ -12,7 +12,7 @@ export class BillingController {
     @Post('create-checkout-session')
     @UseGuards(AuthGuard)
     async createCheckoutSession(@Body() dto: CreateCheckoutSessionDto) {
-        return this.billingService.createCheckoutSession(dto.priceId);
+        return this.billingService.createCheckoutSession(dto.priceId, dto.quantity);
     }
 
     @Post('webhook')
