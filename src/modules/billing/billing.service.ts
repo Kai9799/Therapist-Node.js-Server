@@ -7,10 +7,10 @@ dotenv.config();
 
 @Injectable()
 export class BillingService {
-    private readonly appUrl: string;
+    private readonly frontendURL: string;
 
     constructor() {
-        this.appUrl = process.env.APP_URL!;
+        this.frontendURL = process.env.FRONTEND_URL!;
     }
 
     async createCheckoutSession(priceId: string, quantity: number): Promise<CustomJsonResponse> {
@@ -22,14 +22,16 @@ export class BillingService {
                 subscription_data: {
                     trial_period_days: 14,
                 },
-                success_url: `${this.appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${this.appUrl}/cancel`,
+                success_url: `${this.frontendURL}/stripe/success`,
+                cancel_url: `${this.frontendURL}/stripe/cancel`,
             });
 
             return {
                 status: 'success',
                 message: 'Checkout session created successfully',
-                data: { url: session.url },
+                data: {
+                    url: session.url,
+                },
             };
         } catch (error) {
             return {
@@ -78,36 +80,6 @@ export class BillingService {
             return {
                 status: 'failed',
                 message: 'Failed to fetch products and prices',
-                error,
-            };
-        }
-    }
-
-    async handleWebhook(body: Buffer, sig: string): Promise<CustomJsonResponse> {
-        try {
-            const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-            const event = stripeInstance.webhooks.constructEvent(body, sig, endpointSecret);
-
-            switch (event.type) {
-                case 'checkout.session.completed':
-                    // Handle successful checkout
-                    break;
-                case 'invoice.payment_succeeded':
-                    // Handle successful payment
-                    break;
-                case 'customer.subscription.deleted':
-                    // Handle subscription cancellation
-                    break;
-            }
-
-            return {
-                status: 'success',
-                message: 'Webhook handled successfully',
-            };
-        } catch (error) {
-            return {
-                status: 'failed',
-                message: 'Failed to process webhook',
                 error,
             };
         }
