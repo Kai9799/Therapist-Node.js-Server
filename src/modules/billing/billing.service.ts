@@ -40,6 +40,46 @@ export class BillingService {
         }
     }
 
+    async getProductsWithPrices(): Promise<CustomJsonResponse> {
+        try {
+            const products = await stripeInstance.products.list({ active: true });
+
+            const productDetails = await Promise.all(
+                products.data.map(async (product) => {
+                    const prices = await stripeInstance.prices.list({
+                        product: product.id,
+                        active: true,
+                    });
+
+                    return {
+                        id: product.id,
+                        name: product.name,
+                        description: product.description,
+                        metadata: product.metadata,
+                        prices: prices.data.map((price) => ({
+                            id: price.id,
+                            unit_amount: price.unit_amount,
+                            currency: price.currency,
+                            recurring: price.recurring,
+                        })),
+                    };
+                }),
+            );
+
+            return {
+                status: 'success',
+                message: 'Fetched products with prices',
+                data: productDetails,
+            };
+        } catch (error) {
+            return {
+                status: 'failed',
+                message: 'Failed to fetch products and prices',
+                error,
+            };
+        }
+    }
+
     async handleWebhook(body: Buffer, sig: string): Promise<CustomJsonResponse> {
         try {
             const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
