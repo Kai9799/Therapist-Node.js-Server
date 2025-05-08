@@ -8,4 +8,8 @@ export class CreateCheckoutSessionDto {
     @IsInt()
     @Min(1)
     quantity: number;
+
+    @IsString({ message: 'userId must be a string' })
+    @MinLength(1, { message: 'userId is required' })
+    userId: string;
 }

@@ -34,14 +34,24 @@ export class WebhookService {
         const session = event.data.object;
         const subscription = await this.stripeClient.subscriptions.retrieve(session.subscription as string);
         const customer = await this.stripeClient.customers.retrieve(session.customer as string);
+        const userId = session.client_reference_id;
 
-        console.log("customer", customer); //TODO delete
-        await this.clerkService.updateUserMetadata(session.client_reference_id, {
-            stripeCustomerId: customer.id,
-            stripeSubscriptionId: subscription.id,
-            subscriptionStatus: subscription.status,
-        });
+        if (!userId) {
+            console.error('Client reference ID is missing or invalid');
+            return;
+        }
 
-        console.log('Successfully synced checkout session with Clerk');
+        try {
+            await this.clerkService.updateUserMetadata(userId, {
+                stripeCustomerId: customer.id,
+                stripeSubscriptionId: subscription.id,
+                subscriptionStatus: subscription.status,
+            });
+
+            console.log('Successfully synced checkout session with Clerk');
+        } catch (error) {
+            console.error('Failed to update Clerk metadata:', error);
+        }
     }
+
 }

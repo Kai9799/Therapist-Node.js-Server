@@ -10,7 +10,7 @@ export class BillingController {
     // @UseGuards(AuthGuard)
     @Post('create-checkout-session')
     async createCheckoutSession(@Body() dto: CreateCheckoutSessionDto) {
-        return this.billingService.createCheckoutSession(dto.priceId, dto.quantity);
+        return this.billingService.createCheckoutSession(dto.priceId, dto.quantity, dto.userId);
     }
 
     // @UseGuards(AuthGuard)

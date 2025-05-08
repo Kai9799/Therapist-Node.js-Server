@@ -13,8 +13,13 @@ export class BillingService {
         this.frontendURL = process.env.FRONTEND_URL!;
     }
 
-    async createCheckoutSession(priceId: string, quantity: number): Promise<CustomJsonResponse> {
+    async createCheckoutSession(
+        priceId: string,
+        quantity: number,
+        clerkUserId: string
+    ): Promise<CustomJsonResponse> {
         try {
+
             const session = await stripeInstance.checkout.sessions.create({
                 mode: 'subscription',
                 payment_method_types: ['card'],
@@ -24,6 +29,7 @@ export class BillingService {
                 },
                 success_url: `${this.frontendURL}/stripe/success`,
                 cancel_url: `${this.frontendURL}/stripe/cancel`,
+                client_reference_id: clerkUserId,
             });
 
             return {
@@ -41,6 +47,7 @@ export class BillingService {
             };
         }
     }
+
 
     async getProductsWithPrices(): Promise<CustomJsonResponse> {
         try {
