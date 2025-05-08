@@ -7,13 +7,12 @@ import { AuthGuard } from 'src/guards/auth.guard';
 export class BillingController {
     constructor(private readonly billingService: BillingService) { }
 
-    // @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard)
     @Post('create-checkout-session')
     async createCheckoutSession(@Body() dto: CreateCheckoutSessionDto) {
         return this.billingService.createCheckoutSession(dto.priceId, dto.quantity, dto.userId);
     }
 
-    // @UseGuards(AuthGuard)
     @Get('products')
     async getProductsWithPrices() {
         return this.billingService.getProductsWithPrices();

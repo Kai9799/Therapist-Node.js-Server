@@ -1,23 +1,25 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { SupabaseService } from "src/config/supabase";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { clerkInstance } from 'src/config/clerk';
+import { verifyToken } from '@clerk/backend';
 
 @Injectable()
 export class AuthService {
-    private supabase: SupabaseClient;
-
-    constructor(private readonly supabaseService: SupabaseService) {
-        this.supabase = this.supabaseService.getClient();
-    }
-
     async validateToken(token: string): Promise<any> {
-        const { data, error } = await this.supabase.auth.getUser(token);
-        console.log(error);
+        try {
+            const verifiedToken = await verifyToken(token, {
+                secretKey: process.env.CLERK_SECRET_KEY,
+            });
 
-        if (error) {
+            const userId = verifiedToken.sub;
+            if (!userId) {
+                throw new UnauthorizedException('User ID not found in token');
+            }
+
+            const user = await clerkInstance.users.getUser(userId);
+            return user;
+        } catch (error) {
+            console.error('Clerk token authentication failed:', error);
             throw new UnauthorizedException('Invalid or expired token');
         }
-
-        return data.user;
     }
 }
