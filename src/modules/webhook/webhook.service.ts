@@ -41,14 +41,33 @@ export class WebhookService {
             return;
         }
 
-        try {
-            await this.clerkService.updateUserMetadata(userId, {
-                stripeCustomerId: customer.id,
-                stripeSubscriptionId: subscription.id,
-                subscriptionStatus: subscription.status,
+        const formatDate = (timestamp: number): string =>
+            new Date(timestamp * 1000).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
             });
 
-            console.log('Successfully synced checkout session with Clerk');
+        const metadata: Record<string, any> = {
+            stripeCustomerId: customer.id,
+            stripeSubscriptionId: subscription.id,
+            subscriptionStatus: subscription.status,
+        };
+
+        if (subscription.trial_start && subscription.trial_end) {
+            metadata.isOnTrial = true;
+            metadata.trialStartedAt = formatDate(subscription.trial_start);
+            metadata.trialEndsAt = formatDate(subscription.trial_end);
+        } else {
+            metadata.isOnTrial = false;
+            metadata.currentPeriodStart = formatDate(subscription.start_date);
+            metadata.planId = subscription.items.data[0]?.price.id;
+            metadata.planAmount = subscription.items.data[0]?.price.unit_amount;
+            metadata.planCurrency = subscription.items.data[0]?.price.currency;
+        }
+
+        try {
+            await this.clerkService.updateUserMetadata(userId, metadata);
         } catch (error) {
             console.error('Failed to update Clerk metadata:', error);
         }
