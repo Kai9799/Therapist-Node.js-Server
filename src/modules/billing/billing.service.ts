@@ -15,7 +15,6 @@ export class BillingService {
 
     async createCheckoutSession(priceId: string, quantity: number): Promise<CustomJsonResponse> {
         try {
-            console.log("quantity is ", quantity); //TODO delete
             const session = await stripeInstance.checkout.sessions.create({
                 mode: 'subscription',
                 payment_method_types: ['card'],
