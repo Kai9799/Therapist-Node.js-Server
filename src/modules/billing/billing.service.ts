@@ -61,6 +61,7 @@ export class BillingService {
                             unit_amount: price.unit_amount,
                             currency: price.currency,
                             recurring: price.recurring,
+                            metadata: price.metadata,
                         })),
                     };
                 }),
