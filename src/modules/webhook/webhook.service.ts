@@ -28,12 +28,6 @@ export class WebhookService {
             case 'checkout.session.completed':
                 await this.handleCheckoutSessionCompleted(event);
                 break;
-            case 'invoice.payment_succeeded':
-                await this.handleInvoicePaymentSucceeded(event);
-                break;
-            case 'customer.subscription.created':
-                await this.handleSubscriptionCreated(event);
-                break;
             default:
                 console.log(`Unhandled event type: ${event.type}`);
         }
@@ -44,6 +38,7 @@ export class WebhookService {
         const subscription = await this.stripeClient.subscriptions.retrieve(session.subscription as string);
         const customer = await this.stripeClient.customers.retrieve(session.customer as string);
 
+        console.log("customer", customer); //TODO delete
         await this.clerkService.updateUserMetadata(session.client_reference_id, {
             stripeCustomerId: customer.id,
             stripeSubscriptionId: subscription.id,
@@ -51,15 +46,5 @@ export class WebhookService {
         });
 
         console.log('Successfully synced checkout session with Clerk');
-    }
-
-    private async handleInvoicePaymentSucceeded(event: any): Promise<void> {
-        const invoice = event.data.object;
-        console.log(`Invoice ${invoice.id} payment succeeded`);
-    }
-
-    private async handleSubscriptionCreated(event: any): Promise<void> {
-        const subscription = event.data.object;
-        console.log(`Subscription ${subscription.id} created`);
     }
 }
