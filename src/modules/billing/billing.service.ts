@@ -49,6 +49,7 @@ export class BillingService {
                     const prices = await stripeInstance.prices.list({
                         product: product.id,
                         active: true,
+                        expand: ['data.tiers'],
                     });
 
                     return {
@@ -62,6 +63,7 @@ export class BillingService {
                             currency: price.currency,
                             recurring: price.recurring,
                             metadata: price.metadata,
+                            tiers: price.tiers ?? null,
                         })),
                     };
                 }),
