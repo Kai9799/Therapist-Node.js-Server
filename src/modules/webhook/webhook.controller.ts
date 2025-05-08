@@ -6,16 +6,16 @@ import { WebhookService } from './webhook.service';
 export class WebhookController {
     constructor(private readonly webhookService: WebhookService) { }
 
-    @Post()
+    @Post('stripe')
     async handleStripeWebhook(
-        @Body() body: any,
-        @Headers('stripe-signature') signature: string,
         @Req() req: Request,
+        @Headers('stripe-signature') signature: string,
         @Res() res: Response
     ) {
         const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
         try {
-            const event = await this.webhookService.verifyWebhookSignature(body, signature, endpointSecret);
+            const event = await this.webhookService.verifyWebhookSignature(req.body, signature, endpointSecret);
             await this.webhookService.handleEvent(event);
 
             res.status(200).send('Event received');

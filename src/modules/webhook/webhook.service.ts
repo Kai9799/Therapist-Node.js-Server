@@ -11,14 +11,11 @@ export class WebhookService {
         this.stripeClient = stripeInstance;
     }
 
-    async verifyWebhookSignature(payload: any, signature: string, secret: string): Promise<any> {
+    async verifyWebhookSignature(payload: Buffer, signature: string, secret: string): Promise<any> {
         try {
-            return this.stripeClient.webhooks.constructEvent(
-                JSON.stringify(payload),
-                signature,
-                secret
-            );
-        } catch (error) {
+            return this.stripeClient.webhooks.constructEvent(payload, signature, secret);
+        } catch (error: any) {
+            console.error('Webhook verification error:', error.message);
             throw new Error('Webhook signature verification failed');
         }
     }

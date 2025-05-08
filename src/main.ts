@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as express from 'express';
+import * as bodyParser from 'body-parser';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
@@ -10,10 +10,9 @@ async function bootstrap() {
     origin: '*',
   });
 
+  app.use('/webhook/stripe', bodyParser.raw({ type: 'application/json' }));
   app.use(json());
   app.use(urlencoded({ extended: true }));
-
-  app.use('/webhook', express.raw({ type: 'application/json' }));
 
   await app.listen(process.env.PORT ?? 9001);
 }
