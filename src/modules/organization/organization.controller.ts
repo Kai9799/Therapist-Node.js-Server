@@ -20,7 +20,7 @@ export class OrganizationController {
         @Req() req,
         @Body() dto: CreateOrganizationDto
     ): Promise<CustomJsonResponse> {
-        const clerkUserId = req.user.sub;
+        const clerkUserId = req.user.id;
         const clerkJWTToken = req.user.token;
         return this.service.createOrganization(dto, clerkUserId, clerkJWTToken);
     }

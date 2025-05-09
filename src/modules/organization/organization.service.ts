@@ -22,7 +22,7 @@ export class OrganizationService {
             });
 
             const supabaseClient = this.supabaseService.getClientWithJWT(clerkJWTToken);
-            const { data, error } = await supabaseClient
+            const { data: orgData, error: orgError } = await supabaseClient
                 .from('organizations')
                 .insert([
                     {
@@ -30,21 +30,37 @@ export class OrganizationService {
                         name: dto.name,
                         created_by: clerkUserId,
                     },
-                ]);
+                ])
+                .select()
+                .single();
 
-            if (error) {
-                this.logger.error('Failed to insert organization into Supabase', error);
+            if (orgError || !orgData) {
+                this.logger.error('Failed to insert organization into Supabase', orgError);
                 return {
                     status: 'failed',
                     message: 'Failed to insert organization into Supabase',
-                    error: error,
+                    error: orgError || new Error('Failed to insert organization into Supabase'),
+                };
+            }
+
+            const { error: userUpdateError } = await supabaseClient
+                .from('users')
+                .update({ organization_id: orgData.id })
+                .eq('clerk_id', clerkUserId);
+
+            if (userUpdateError) {
+                this.logger.error('Failed to update user with organization ID', userUpdateError);
+                return {
+                    status: 'failed',
+                    message: 'Organization created but failed to update user',
+                    error: userUpdateError,
                 };
             }
 
             return {
                 status: 'success',
-                message: 'Organization created successfully',
-                data: data,
+                message: 'Organization created and user updated successfully',
+                data: orgData,
             };
         } catch (err) {
             this.logger.error('Failed to create organization', err);
@@ -55,4 +71,5 @@ export class OrganizationService {
             };
         }
     }
+
 }
