@@ -45,7 +45,7 @@ export class OrganizationService {
 
             const { error: userUpdateError } = await supabaseClient
                 .from('users')
-                .update({ organization_id: orgData.id })
+                .update({ organization_id: organization.id })
                 .eq('clerk_id', clerkUserId);
 
             if (userUpdateError) {
