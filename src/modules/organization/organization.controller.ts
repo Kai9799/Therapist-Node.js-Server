@@ -21,6 +21,7 @@ export class OrganizationController {
         @Body() dto: CreateOrganizationDto
     ): Promise<CustomJsonResponse> {
         const clerkUserId = req.user.sub;
-        return this.service.createOrganization(dto, clerkUserId);
+        const clerkJWTToken = req.user.token;
+        return this.service.createOrganization(dto, clerkUserId, clerkJWTToken);
     }
 }

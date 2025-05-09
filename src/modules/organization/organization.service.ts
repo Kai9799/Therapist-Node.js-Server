@@ -7,15 +7,13 @@ import { SupabaseService } from 'src/config/supabase';
 @Injectable()
 export class OrganizationService {
     private readonly logger = new Logger(OrganizationService.name);
-    private readonly supabaseService: SupabaseService;
 
-    constructor(supabaseService: SupabaseService) {
-        this.supabaseService = supabaseService;
-    }
+    constructor(private readonly supabaseService: SupabaseService) { }
 
     async createOrganization(
         dto: CreateOrganizationDto,
-        clerkUserId: string
+        clerkUserId: string,
+        clerkJWTToken: string
     ): Promise<CustomJsonResponse> {
         try {
             const organization = await clerkInstance.organizations.createOrganization({
@@ -23,15 +21,15 @@ export class OrganizationService {
                 createdBy: clerkUserId,
             });
 
-            const { data, error } = await this.supabaseService.getClient()
+            const supabaseClient = this.supabaseService.getClientWithJWT(clerkJWTToken);
+            const { data, error } = await supabaseClient
                 .from('organizations')
                 .insert([
                     {
-                        id: organization.id,
                         clerk_id: organization.id,
                         name: dto.name,
                         created_by: clerkUserId,
-                    }
+                    },
                 ]);
 
             if (error) {
